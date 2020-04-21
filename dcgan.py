@@ -167,7 +167,7 @@ class DCGAN(object):
             print(
                 f'E: {epoch + 1}, G: {g_loss}, D: {d_loss}, T: {time.time() - start}')
 
-            if (epoch + 1) % 10:
+            if (epoch + 1) % 10 == 0:
                 generated_image = self.generator(
                     tf.random.normal([1, NOISE_DIM]))
                 generated_image = generated_image[0, :, :, 0]
