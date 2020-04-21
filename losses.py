@@ -3,6 +3,8 @@ import tensorflow as tf
 _all_losses = [
     'minimax_discriminator_loss',
     'minimax_generator_loss',
+    'tf_minimax_discriminator_loss',
+    'tf_minimax_generator_loss',
 ]
 
 def minimax_discriminator_loss(real_outputs,
