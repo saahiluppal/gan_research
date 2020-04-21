@@ -175,3 +175,4 @@ class DCGAN(object):
                     write_dir, f'{epoch + 1}.png'), generated_image.numpy())
                 
                 manager.save()
+                print('Checkpoint Saved...')
