@@ -29,20 +29,20 @@ class Generator(tf.keras.Model):
             tf.keras.layers.Input(shape=(noise_dim,)),
             tf.keras.layers.Dense(4 * 4 * 128),
             tf.keras.layers.BatchNormalization(),
-            tf.keras.layers.LeakyReLU(),
+            tf.keras.layers.LeakyReLU(0.3),
 
             tf.keras.layers.Reshape((4, 4, 128)),
             tf.keras.layers.Conv2DTranspose(256, 4, strides=1),
             tf.keras.layers.BatchNormalization(),
-            tf.keras.layers.LeakyReLU(),
+            tf.keras.layers.LeakyReLU(0.3),
 
             tf.keras.layers.Conv2DTranspose(128, 5, strides=2, padding='same'),
             tf.keras.layers.BatchNormalization(),
-            tf.keras.layers.LeakyReLU(),
+            tf.keras.layers.LeakyReLU(0.3),
 
             tf.keras.layers.Conv2DTranspose(64, 5, strides=2, padding='same'),
             tf.keras.layers.BatchNormalization(),
-            tf.keras.layers.LeakyReLU(),
+            tf.keras.layers.LeakyReLU(0.3),
 
             tf.keras.layers.Conv2DTranspose(1, 1, activation='tanh'),
         ])
@@ -59,20 +59,23 @@ class Discriminator(tf.keras.Model):
         self.model = tf.keras.Sequential([
             tf.keras.layers.Input(shape=input_shape),
             tf.keras.layers.Conv2D(32, 3, padding='valid'),
-            tf.keras.layers.LeakyReLU(),
+            tf.keras.layers.LeakyReLU(0.3),
 
             tf.keras.layers.Conv2D(64, 3, strides=2),
-            tf.keras.layers.LeakyReLU(),
+            tf.keras.layers.BatchNormalization(),
+            tf.keras.layers.LeakyReLU(0.3),
             tf.keras.layers.Dropout(0.3),
 
             tf.keras.layers.Conv2D(128, 3, strides=2),
-            tf.keras.layers.LeakyReLU(),
+            tf.keras.layers.BatchNormalization(),
+            tf.keras.layers.LeakyReLU(0.3),
 
             tf.keras.layers.Conv2D(256, 3, strides=2),
-            tf.keras.layers.LeakyReLU(),
+            tf.keras.layers.BatchNormalization(),
+            tf.keras.layers.LeakyReLU(0.3),
 
             tf.keras.layers.Flatten(),
-            tf.keras.layers.Dense(1, activation='sigmoid')
+            tf.keras.layers.Dense(1)
         ])
 
     def call(self, x):
@@ -112,9 +115,9 @@ class DCGAN(object):
         self.dataset = prepare_dataset()
 
         self.generator_optimizer = tf.keras.optimizers.Adam(
-            learning_rate=1e-4)
+            learning_rate=2e-4, beta_1 = 0.5)
         self.discriminator_optimizer = tf.keras.optimizers.Adam(
-            learning_rate=1e-4)
+            learning_rate=2e-4, beta_1 = 0.5)
 
     @tf.function
     def train_discriminator(self, images):
