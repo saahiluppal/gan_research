@@ -152,6 +152,7 @@ class DCGAN(object):
 
     def train(self):
         write_dir = './images'
+        os.mkdir(write_dir)
 
         ckpt = tf.train.Checkpoint(generator = self.generator)
         manager = tf.train.CheckpointManager(ckpt, './checkpoints', max_to_keep = 3)
