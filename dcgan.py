@@ -29,20 +29,20 @@ class Generator(tf.keras.Model):
             tf.keras.layers.Input(shape=(noise_dim,)),
             tf.keras.layers.Dense(4 * 4 * 128),
             tf.keras.layers.BatchNormalization(),
-            tf.keras.layers.LeakyReLU(),
+            tf.keras.layers.LeakyReLU(0.2),
 
             tf.keras.layers.Reshape((4, 4, 128)),
             tf.keras.layers.Conv2DTranspose(256, 4, strides=1),
             tf.keras.layers.BatchNormalization(),
-            tf.keras.layers.LeakyReLU(),
+            tf.keras.layers.LeakyReLU(0.2),
 
             tf.keras.layers.Conv2DTranspose(128, 5, strides=2, padding='same'),
             tf.keras.layers.BatchNormalization(),
-            tf.keras.layers.LeakyReLU(),
+            tf.keras.layers.LeakyReLU(0.2),
 
             tf.keras.layers.Conv2DTranspose(64, 5, strides=2, padding='same'),
             tf.keras.layers.BatchNormalization(),
-            tf.keras.layers.LeakyReLU(),
+            tf.keras.layers.LeakyReLU(0.2),
 
             tf.keras.layers.Conv2DTranspose(1, 1, activation='tanh'),
         ])
@@ -59,22 +59,23 @@ class Discriminator(tf.keras.Model):
         self.model = tf.keras.Sequential([
             tf.keras.layers.Input(shape=input_shape),
             tf.keras.layers.Conv2D(32, 3, padding='valid'),
-            tf.keras.layers.LeakyReLU(),
+            tf.keras.layers.LeakyReLU(0.2),
 
             tf.keras.layers.Conv2D(64, 3, strides=2),
-            tf.keras.layers.LeakyReLU(),
+            tf.keras.layers.BatchNormalization(),
+            tf.keras.layers.LeakyReLU(0.2),
             tf.keras.layers.Dropout(0.3),
 
-            tf.keras.layers.Conv2D(128, 3),
-            tf.keras.layers.LeakyReLU(),
-            tf.keras.layers.MaxPooling2D(2),
+            tf.keras.layers.Conv2D(128, 3, strides=2),
+            tf.keras.layers.BatchNormalization(),
+            tf.keras.layers.LeakyReLU(0.2),
 
             tf.keras.layers.Conv2D(256, 3, strides=2),
-            tf.keras.layers.LeakyReLU(),
-            tf.keras.layers.MaxPooling2D(2),
+            tf.keras.layers.BatchNormalization(),
+            tf.keras.layers.LeakyReLU(0.2),
 
             tf.keras.layers.Flatten(),
-            tf.keras.layers.Dense(1)
+            tf.keras.layers.Dense(1, activation='sigmoid')
         ])
 
     def call(self, x):
@@ -113,8 +114,10 @@ class DCGAN(object):
 
         self.dataset = prepare_dataset()
 
-        self.generator_optimizer = tf.keras.optimizers.Adam(1e-4)
-        self.discriminator_optimizer = tf.keras.optimizers.Adam(1e-4)
+        self.generator_optimizer = tf.keras.optimizers.Adam(
+            learning_rate=2e-4, beta_1=0.5)
+        self.discriminator_optimizer = tf.keras.optimizers.Adam(
+            learning_rate=2e-4, beta_1=0.5)
 
     @tf.function
     def train_discriminator(self, images):
@@ -155,8 +158,9 @@ class DCGAN(object):
         if not os.path.exists(write_dir):
             os.mkdir(write_dir)
 
-        ckpt = tf.train.Checkpoint(generator = self.generator)
-        manager = tf.train.CheckpointManager(ckpt, './checkpoints', max_to_keep = 3)
+        ckpt = tf.train.Checkpoint(generator=self.generator)
+        manager = tf.train.CheckpointManager(
+            ckpt, './checkpoints', max_to_keep=3)
 
         for epoch in range(EPOCHS):
             start = time.time()
@@ -175,6 +179,6 @@ class DCGAN(object):
                 generated_image = generated_image[0, :, :, 0]
                 mplim.image.imsave(os.path.join(
                     write_dir, f'{epoch + 1}.png'), generated_image.numpy())
-                
+
                 manager.save()
                 print('Checkpoint Saved...')
