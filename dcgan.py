@@ -1,5 +1,5 @@
 import tensorflow as tf
-import matplotlib as mpl
+import matplotlib.image as mplim
 import time
 import os
 
@@ -152,7 +152,8 @@ class DCGAN(object):
 
     def train(self):
         write_dir = './images'
-        os.mkdir(write_dir)
+        if not os.path.exists(write_dir):
+            os.mkdir(write_dir)
 
         ckpt = tf.train.Checkpoint(generator = self.generator)
         manager = tf.train.CheckpointManager(ckpt, './checkpoints', max_to_keep = 3)
@@ -172,7 +173,7 @@ class DCGAN(object):
                 generated_image = self.generator(
                     tf.random.normal([1, NOISE_DIM]))
                 generated_image = generated_image[0, :, :, 0]
-                mpl.image.imsave(os.path.join(
+                mplim.image.imsave(os.path.join(
                     write_dir, f'{epoch + 1}.png'), generated_image.numpy())
                 
                 manager.save()
