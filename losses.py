@@ -7,6 +7,8 @@ _all_losses = [
     'tf_minimax_generator_loss',
     'modified_discriminator_loss',
     'modified_generator_loss',
+    'tf_modified_discriminator_loss',
+    'tf_modified_generator_loss',
 ]
 
 # Minimax Custom Implementation ->>
