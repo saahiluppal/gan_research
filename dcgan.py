@@ -7,7 +7,7 @@ BUFFER_SIZE = 412_000
 BATCH_SIZE = 128
 EPOCHS = 1000
 NOISE_DIM = 100
-K = 3
+K = 2
 
 
 def prepare_dataset():
@@ -155,7 +155,8 @@ class DCGAN(object):
         if not os.path.exists(write_dir):
             os.mkdir(write_dir)
 
-        ckpt = tf.train.Checkpoint(generator=self.generator)
+        ckpt = tf.train.Checkpoint(generator=self.generator,
+                                    discriminator=self.discriminator)
         manager = tf.train.CheckpointManager(
             ckpt, './checkpoints', max_to_keep=3)
 
