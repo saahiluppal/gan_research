@@ -165,17 +165,19 @@ class VanillaGAN(object):
                 if index % K == 0:
                     g_loss = self.train_generator()
 
-        print(f'E: {epoch + 1}, G: {g_loss}, D: {d_loss}, T: {time.time() - start}')
+            print(
+                f'E: {epoch + 1}, G: {g_loss}, D: {d_loss}, T: {time.time() - start}')
 
-        if (epoch + 1) % 10 == 0:
-            generated_image = self.generator(
-                tf.random.normal([1, NOISE_DIM]))
-            generated_image = tf.reshape(generated_image[0], (28, 28))
-            mplim.imsave(os.path.join(
-                write_dir, f'{epoch + 1}.png'), generated_image.numpy())
+            if (epoch + 1) % 10 == 0:
+                generated_image = self.generator(
+                    tf.random.normal([1, NOISE_DIM]))
+                generated_image = tf.reshape(generated_image[0], (28, 28))
+                mplim.imsave(os.path.join(
+                    write_dir, f'{epoch + 1}.png'), generated_image.numpy())
 
-            manager.save()
-            print('Checkpoint Saved...')
+                manager.save()
+                print('Checkpoint Saved...')
+
 
 gan = VanillaGAN()
 gan.train()
