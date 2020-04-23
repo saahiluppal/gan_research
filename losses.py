@@ -12,6 +12,8 @@ _all_losses = [
 ]
 
 # Minimax Custom Implementation ->>
+
+
 def minimax_discriminator_loss(real_outputs,
                                generated_outputs,
                                real_weights=1.,
@@ -85,6 +87,8 @@ def minimax_generator_loss(generated_outputs,
     return tf.reduce_mean(loss)
 
 # Minimax Tensorflow's Implementation ->>
+
+
 def tf_minimax_discriminator_loss(real_outputs,
                                   generated_outputs,
                                   smoothing=0.25,
@@ -158,6 +162,8 @@ def tf_minimax_generator_loss(generated_outputs,
     return loss
 
 # Modified Custom Implementation ->>
+
+
 def modified_discriminator_loss(real_outputs,
                                 generated_outputs,
                                 real_weights=1.0,
@@ -190,6 +196,7 @@ def modified_discriminator_loss(real_outputs,
 
     return tf.reduce_mean(loss)
 
+
 def modified_generator_loss(generated_outputs,
                             smoothing=0.0,
                             weights=1.0):
@@ -204,27 +211,28 @@ def modified_generator_loss(generated_outputs,
       `discriminator_gen_outputs`, and must be broadcastable to `labels` (i.e.,
       all dimensions must be either `1`, or the same as the corresponding
       dimension).
-    
+
     L = - log(sigmoid(D(G(z))))
     """
     if smoothing > 0:
         generated_outputs = (generated_outputs * (1 - smoothing) +
-                        0.5 * smoothing)
+                             0.5 * smoothing)
 
     loss = tf.nn.weighted_cross_entropy_with_logits(
-        labels = tf.ones_like(generated_outputs),
-        logits = generated_outputs,
-        pos_weight = weights,
+        labels=tf.ones_like(generated_outputs),
+        logits=generated_outputs,
+        pos_weight=weights,
     )
 
     return tf.reduce_mean(loss)
 
+
 def tf_modified_discriminator_loss(real_outputs,
-                                  generated_outputs,
-                                  smoothing=0.25,
-                                  real_weights=1.0,
-                                  generated_weights=1.0,
-                                  reduction=tf.compat.v1.losses.Reduction.SUM_BY_NONZERO_WEIGHTS):
+                                   generated_outputs,
+                                   smoothing=0.25,
+                                   real_weights=1.0,
+                                   generated_weights=1.0,
+                                   reduction=tf.compat.v1.losses.Reduction.SUM_BY_NONZERO_WEIGHTS):
     """
     Same as tf minimax discriminator loss
     Args:
@@ -250,10 +258,11 @@ def tf_modified_discriminator_loss(real_outputs,
         reduction,
     )
 
+
 def tf_modified_generator_loss(generated_outputs,
-                                smoothing = 0.0,
-                                weights = 1.0,
-                                reduction = tf.compat.v1.losses.Reduction.SUM_BY_NONZERO_WEIGHTS):
+                               smoothing=0.0,
+                               weights=1.0,
+                               reduction=tf.compat.v1.losses.Reduction.SUM_BY_NONZERO_WEIGHTS):
     """
     Args:
     generated_outputs: Discriminator output on generated data. Expected
@@ -270,15 +279,16 @@ def tf_modified_generator_loss(generated_outputs,
     L = -log(sigmoid(D(G(z))))
     """
     loss = tf.compat.v1.losses.sigmoid_cross_entropy(
-        multi_class_labels = tf.ones_like(generated_outputs),
-        logits = generated_outputs,
-        weights = weights,
-        label_smoothing = smoothing,
-        reduction = reduction,
+        multi_class_labels=tf.ones_like(generated_outputs),
+        logits=generated_outputs,
+        weights=weights,
+        label_smoothing=smoothing,
+        reduction=reduction,
     )
     return loss
 
-## Testing Implementations:
+
+# Testing Implementations:
 real_output = tf.constant([-5.0, 1.4, 12.5, 2.7])
 generated_output = tf.constant([10.0, 4.4, -5.5, 3.6])
 
@@ -287,13 +297,3 @@ minimiax_expected_g_loss = -4.82408
 
 modified_expected_d_loss = 6.19637
 modified_expected_g_loss = 1.38582
-
-
-print(minimax_discriminator_loss(real_output, generated_output))
-print(minimax_generator_loss(generated_output))
-
-print(modified_discriminator_loss(real_output, generated_output))
-print(modified_generator_loss(generated_output))
-
-print(tf_modified_discriminator_loss(real_output, generated_output))
-print(tf_modified_generator_loss(generated_output))
