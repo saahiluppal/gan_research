@@ -176,3 +176,6 @@ class VanillaGAN(object):
 
             manager.save()
             print('Checkpoint Saved...')
+
+gan = VanillaGAN()
+gan.train()
