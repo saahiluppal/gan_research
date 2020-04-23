@@ -156,7 +156,7 @@ class DCGAN(object):
             os.mkdir(write_dir)
 
         ckpt = tf.train.Checkpoint(generator=self.generator,
-                                    discriminator=self.discriminator)
+                                   discriminator=self.discriminator)
         manager = tf.train.CheckpointManager(
             ckpt, './checkpoints', max_to_keep=3)
 
