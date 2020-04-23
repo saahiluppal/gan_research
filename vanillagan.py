@@ -134,7 +134,7 @@ class VanillaGAN(object):
     @tf.function
     def train_generator(self):
         noise = tf.random.normal([BATCH_SIZE, NOISE_DIM])
-        with tf.GradientTape as tape:
+        with tf.GradientTape() as tape:
             generated_images = self.generator(noise, training=True)
 
             fake_output = self.discriminator(generated_images)
