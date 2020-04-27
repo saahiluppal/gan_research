@@ -174,7 +174,7 @@ class DCGAN(object):
 
             if (epoch + 1) % 100 == 0:
                 self.checkpoint_and_save(epoch + 1)
-    
+
     def checkpoint_and_save(self, epoch):
         r, c = 2, 5
         noise = tf.random.normal([r * c, NOISE_DIM])
@@ -197,6 +197,7 @@ class DCGAN(object):
 
         self.manager.save()
         print('Checkpoint and PNG Saved...')
+
 
 if __name__ == '__main__':
     gan = DCGAN()

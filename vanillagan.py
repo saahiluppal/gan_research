@@ -171,7 +171,7 @@ class VanillaGAN(object):
 
             if (epoch + 1) % 100 == 0:
                 self.checkpoint_and_save(epoch + 1)
-    
+
     def checkpoint_and_save(self, epoch):
         r, c = 2, 5
         noise = tf.random.normal([r * c, NOISE_DIM])
@@ -184,7 +184,8 @@ class VanillaGAN(object):
 
         for i in range(r):
             for j in range(c):
-                ax[i, j].imshow(tf.reshape(generated_images[count], (28, 28)), cmap='gray')
+                ax[i, j].imshow(tf.reshape(
+                    generated_images[count], (28, 28)), cmap='gray')
                 ax[i, j].axis('off')
                 count += 1
 
@@ -194,3 +195,8 @@ class VanillaGAN(object):
 
         self.manager.save()
         print('Checkpoint and PNG Saved...')
+
+
+if __name__ == '__main__':
+    gan = VanillaGAN()
+    gan.train()
