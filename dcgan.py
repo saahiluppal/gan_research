@@ -172,7 +172,7 @@ class DCGAN(object):
             print(
                 f'E: {epoch + 1}, G: {g_loss}, D: {d_loss}, T: {time.time() - start}')
 
-            if (epoch + 1) % 10 == 0:
+            if (epoch + 1) % 100 == 0:
                 self.checkpoint_and_save(epoch + 1)
     
     def checkpoint_and_save(self, epoch):
@@ -187,7 +187,7 @@ class DCGAN(object):
 
         for i in range(r):
             for j in range(c):
-                ax[i, j].imshow(generated_images[count, :, :, 0])
+                ax[i, j].imshow(generated_images[count, :, :, 0], cmap='gray')
                 ax[i, j].axis('off')
                 count += 1
 
