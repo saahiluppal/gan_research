@@ -7,7 +7,7 @@ BUFFER_SIZE = 412_000
 BATCH_SIZE = 128
 EPOCHS = 1000
 NOISE_DIM = 100
-K = 1
+K = 2
 
 
 def prepare_dataset():
