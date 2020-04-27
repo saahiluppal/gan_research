@@ -1,5 +1,5 @@
 import tensorflow as tf
-import matplotlib.image as mplim
+import matplotlib.pyplot as plt
 import time
 import os
 
@@ -107,6 +107,8 @@ class VanillaGAN(object):
         self.discriminator = Discriminator()
 
         self.dataset = prepare_dataset()
+        self.write_dir = './images'
+        self.checkpoint_dir = './checkpoints'
 
         self.generator_optimizer = tf.keras.optimizers.Adam(
             learning_rate=1e-4)
@@ -148,14 +150,13 @@ class VanillaGAN(object):
         return loss
 
     def train(self):
-        write_dir = './images'
-        if not os.path.exists(write_dir):
-            os.mkdir(write_dir)
+        if not os.path.exists(self.write_dir):
+            os.mkdir(self.write_dir)
 
         ckpt = tf.train.Checkpoint(generator=self.generator,
                                    discriminator=self.discriminator)
-        manager = tf.train.CheckpointManager(
-            ckpt, './checkpoints', max_to_keep=3)
+        self.manager = tf.train.CheckpointManager(
+            ckpt, self.checkpoint_dir, max_to_keep=3)
 
         for epoch in range(EPOCHS):
             start = time.time()
@@ -168,12 +169,28 @@ class VanillaGAN(object):
             print(
                 f'E: {epoch + 1}, G: {g_loss}, D: {d_loss}, T: {time.time() - start}')
 
-            if (epoch + 1) % 10 == 0:
-                generated_image = self.generator(
-                    tf.random.normal([1, NOISE_DIM]))
-                generated_image = tf.reshape(generated_image[0], (28, 28))
-                mplim.imsave(os.path.join(
-                    write_dir, f'{epoch + 1}.png'), generated_image.numpy())
+            if (epoch + 1) % 100 == 0:
+                self.checkpoint_and_save(epoch + 1)
+    
+    def checkpoint_and_save(self, epoch):
+        r, c = 2, 5
+        noise = tf.random.normal([r * c, NOISE_DIM])
 
-                manager.save()
-                print('Checkpoint Saved...')
+        generated_images = self.generator(noise)
+        generated_images = 0.5 * generated_images + 0.5
+
+        fig, ax = plt.subplots(r, c)
+        count = 0
+
+        for i in range(r):
+            for j in range(c):
+                ax[i, j].imshow(tf.reshape(generated_images[count], (28, 28)), cmap='gray')
+                ax[i, j].axis('off')
+                count += 1
+
+        save_path = os.path.join(self.write_dir, f'{epoch}.png')
+        fig.savefig(save_path)
+        plt.close()
+
+        self.manager.save()
+        print('Checkpoint and PNG Saved...')
