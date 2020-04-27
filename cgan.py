@@ -4,11 +4,11 @@ import matplotlib.pyplot as plt
 import os
 
 NOISE_DIM = 100
-BATCH_SIZE = 256
+BATCH_SIZE = 128
 BUFFER_SIZE = 100
 EPOCHS = 20000
 NUM_CLASSES = 10
-K = 1
+K = 2
 
 
 def prepare_dataset():
@@ -170,10 +170,10 @@ class CGAN(object):
         if not os.path.exists(self.write_dir):
             os.mkdir(self.write_dir)
 
-        self.ckpt = tf.train.Checkpoint(generator=self.generator,
+        ckpt = tf.train.Checkpoint(generator=self.generator,
                                         discriminator=self.discriminator)
         self.manager = tf.train.CheckpointManager(
-            self.ckpt, self.checkpoint_dir, max_to_keep=3)
+            ckpt, self.checkpoint_dir, max_to_keep=3)
 
         for epoch in range(EPOCHS):
             start = time.time()
@@ -199,8 +199,8 @@ class CGAN(object):
         fig, ax = plt.subplots(r, c)
         count = 0
 
-        for i in range(2):
-            for j in range(5):
+        for i in range(r):
+            for j in range(c):
                 ax[i, j].imshow(tf.reshape(
                     generated_images[count], (28, 28)), cmap='gray')
                 ax[i, j].set_title(f'Digit {count}')
