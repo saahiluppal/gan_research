@@ -237,71 +237,72 @@ def discriminator(norm_type='batchnorm', target=True):
         return tf.keras.Model(inputs=inp, outputs=last)
 
 
-
 class Pix2Pix(object):
-  def __init__(self):
-    self.generator = unet_generator(output_channels=3)
-    self.discriminator = discriminator()
-    self.dataset = create_dataset('./facades/train/*.jpg')
+    def __init__(self):
+        self.generator = unet_generator(output_channels=3)
+        self.discriminator = discriminator()
+        self.dataset = create_dataset('./facades/train/*.jpg')
 
-    self.loss_object = tf.keras.losses.BinaryCrossentropy(from_logits = True)
-    self.generator_optimizer = tf.keras.optimizers.Adam(2e-4, beta_1=0.5)
-    self.discriminator_optimizer = tf.keras.optimizers.Adam(2e-4, beta_1=0.5)
-  
-  def discriminator_loss(self, disc_real_output, disc_generated_output):
-    real_loss = self.loss_object(
-          tf.ones_like(disc_real_output), disc_real_output)
+        self.loss_object = tf.keras.losses.BinaryCrossentropy(from_logits=True)
+        self.generator_optimizer = tf.keras.optimizers.Adam(2e-4, beta_1=0.5)
+        self.discriminator_optimizer = tf.keras.optimizers.Adam(
+            2e-4, beta_1=0.5)
 
-    generated_loss = self.loss_object(tf.zeros_like(
-        disc_generated_output), disc_generated_output)
+    def discriminator_loss(self, disc_real_output, disc_generated_output):
+        real_loss = self.loss_object(
+            tf.ones_like(disc_real_output), disc_real_output)
 
-    total_disc_loss = real_loss + generated_loss
+        generated_loss = self.loss_object(tf.zeros_like(
+            disc_generated_output), disc_generated_output)
 
-    return total_disc_loss
-  
-  def generator_loss(self, disc_generated_output, gen_output, target):
-    gan_loss = self.loss_object(tf.ones_like(
-        disc_generated_output), disc_generated_output)
+        total_disc_loss = real_loss + generated_loss
 
-    l1_loss = tf.reduce_mean(tf.abs(target - gen_output))
-    total_gen_loss = gan_loss + (LAMBDA * l1_loss)
-    return total_gen_loss
-  
-  @tf.function
-  def train_step(self, input_image, target_image):
-    with tf.GradientTape() as gen_tape, tf.GradientTape() as disc_tape:
-      gen_output = self.generator(input_image, training=True)
+        return total_disc_loss
 
-      disc_real_output = self.discriminator(
-          [input_image, target_image], training=True)
-      disc_generated_output = self.discriminator(
-          [input_image, gen_output], training=True)
+    def generator_loss(self, disc_generated_output, gen_output, target):
+        gan_loss = self.loss_object(tf.ones_like(
+            disc_generated_output), disc_generated_output)
 
-      gen_loss = self.generator_loss(
-          disc_generated_output, gen_output, target_image)
-      disc_loss = self.discriminator_loss(
-          disc_real_output, disc_generated_output)
+        l1_loss = tf.reduce_mean(tf.abs(target - gen_output))
+        total_gen_loss = gan_loss + (LAMBDA * l1_loss)
+        return total_gen_loss
 
-    generator_gradients = gen_tape.gradient(
-        gen_loss, self.generator.trainable_variables)
-    discriminator_gradients = disc_tape.gradient(
-        disc_loss, self.discriminator.trainable_variables)
+    @tf.function
+    def train_step(self, input_image, target_image):
+        with tf.GradientTape() as gen_tape, tf.GradientTape() as disc_tape:
+            gen_output = self.generator(input_image, training=True)
 
-    self.generator_optimizer.apply_gradients(zip(
-        generator_gradients, self.generator.trainable_variables))
-    self.discriminator_optimizer.apply_gradients(zip(
-        discriminator_gradients, self.discriminator.trainable_variables))
+            disc_real_output = self.discriminator(
+                [input_image, target_image], training=True)
+            disc_generated_output = self.discriminator(
+                [input_image, gen_output], training=True)
 
-    return gen_loss, disc_loss
+            gen_loss = self.generator_loss(
+                disc_generated_output, gen_output, target_image)
+            disc_loss = self.discriminator_loss(
+                disc_real_output, disc_generated_output)
 
-  def train(self):
-    for epoch in range(EPOCHS):
-      start = time.time()
+        generator_gradients = gen_tape.gradient(
+            gen_loss, self.generator.trainable_variables)
+        discriminator_gradients = disc_tape.gradient(
+            disc_loss, self.discriminator.trainable_variables)
 
-      for index, (images, target) in enumerate(self.dataset):
-        loss = self.train_step(images, target)
-        
-      print(f'E: {epoch + 1}, L: {loss}, T: {time.time() - start}')
+        self.generator_optimizer.apply_gradients(zip(
+            generator_gradients, self.generator.trainable_variables))
+        self.discriminator_optimizer.apply_gradients(zip(
+            discriminator_gradients, self.discriminator.trainable_variables))
+
+        return gen_loss, disc_loss
+
+    def train(self):
+        for epoch in range(EPOCHS):
+            start = time.time()
+
+            for index, (images, target) in enumerate(self.dataset):
+                loss = self.train_step(images, target)
+
+            print(f'E: {epoch + 1}, L: {loss}, T: {time.time() - start}')
+
 
 if __name__ == "__main__":
     gan = Pix2Pix()
